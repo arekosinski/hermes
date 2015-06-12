@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static pl.allegro.tech.hermes.api.Topic.ContentType;
 
 @Component
 public class SchemaValidator {
@@ -31,7 +34,29 @@ public class SchemaValidator {
         this.objectMapper = objectMapper;
     }
 
-    public void check(String schema) {
+    //TODO refactor - move validators to separate classes
+    public void check(String schema, ContentType contentType) {
+        switch (contentType) {
+            case JSON:
+                validateJsonSchema(schema);
+                break;
+            case AVRO:
+                validateAvroSchema(schema);
+                break;
+            default:
+                throw new IllegalStateException("Unsupported content type");
+        }
+    }
+
+    private void validateAvroSchema(String schema) {
+        try {
+            new Schema.Parser().parse(schema);
+        } catch (SchemaParseException e) {
+            throw new InvalidSchemaException(e);
+        }
+    }
+
+    private void validateJsonSchema(String schema) {
         checkArgument(!isNullOrEmpty(schema), "Message schema cannot be empty");
 
         List<String> errors = new ArrayList<>();

@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 import pl.allegro.tech.hermes.api.EndpointAddress;
 import pl.allegro.tech.hermes.api.Subscription;
 import pl.allegro.tech.hermes.api.SubscriptionPolicy;
+import pl.allegro.tech.hermes.api.Topic;
 import pl.allegro.tech.hermes.api.TopicName;
 import pl.allegro.tech.hermes.integration.client.SlowClient;
 import pl.allegro.tech.hermes.integration.env.SharedServices;
@@ -29,6 +30,7 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 import static org.glassfish.jersey.client.ClientProperties.REQUEST_ENTITY_PROCESSING;
 import static org.glassfish.jersey.client.RequestEntityProcessing.CHUNKED;
 import static pl.allegro.tech.hermes.api.Topic.Builder.topic;
+import static pl.allegro.tech.hermes.api.Topic.ContentType.JSON;
 import static pl.allegro.tech.hermes.integration.test.HermesAssertions.assertThat;
 
 public class PublishingTest extends IntegrationTest {
@@ -89,7 +91,7 @@ public class PublishingTest extends IntegrationTest {
         operations.buildSubscription("publishMessageSetGroup", "topic", "subscription", HTTP_ENDPOINT_URL);
 
         TestMessageSet messages = TestMessageSet.of(TestMessage.of("hello", "world"), TestMessage.of("hello1", "world"));
-        remoteService.expectMessages(TestMessage.of("hello", "world").body(), TestMessage.of("hello1", "world").body());
+        remoteService.expectMessages(TestMessage.of("hello1", "world").body(), TestMessage.of("hello", "world").body());
 
         // when
         publisher.publish("publishMessageSetGroup.topic", messages.body());
@@ -282,7 +284,8 @@ public class PublishingTest extends IntegrationTest {
     public void shouldPublishValidMessageWithJsonSchema() {
         //given
         String message = "{\"id\": 6}";
-        operations.buildTopic(topic().withName("schema.topic").withValidation(true).withMessageSchema(schema).build());
+        operations.buildTopic(
+            topic().withName("schema.topic").withValidation(true).withMessageSchema(schema).withContentType(JSON).build());
 
         //when
         Response response = publisher.publish("schema.topic", message);
@@ -295,7 +298,8 @@ public class PublishingTest extends IntegrationTest {
     public void shouldNotPublishInvalidMessageWithJsonSchema() {
         // given
         String messageInvalidWithSchema = "{\"id\": \"shouldBeNumber\"}";
-        operations.buildTopic(topic().withName("schema.topic").withValidation(true).withMessageSchema(schema).build());
+        operations.buildTopic(
+            topic().withName("schema.topic").withValidation(true).withMessageSchema(schema).withContentType(JSON).build());
 
         //when
         Response response = publisher.publish("schema.topic", messageInvalidWithSchema);

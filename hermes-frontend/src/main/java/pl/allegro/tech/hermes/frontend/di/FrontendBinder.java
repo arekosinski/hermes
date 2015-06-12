@@ -18,8 +18,9 @@ import pl.allegro.tech.hermes.frontend.publishing.MessagePublisher;
 import pl.allegro.tech.hermes.frontend.publishing.PublishingServlet;
 import pl.allegro.tech.hermes.frontend.server.HermesServer;
 import pl.allegro.tech.hermes.frontend.services.HealthCheckService;
-import pl.allegro.tech.hermes.frontend.validator.MessageValidator;
+import pl.allegro.tech.hermes.frontend.validator.MessageValidators;
 import pl.allegro.tech.hermes.frontend.validator.Preconditions;
+import pl.allegro.tech.hermes.frontend.validator.TopicMessageValidatorFactory;
 import pl.allegro.tech.hermes.frontend.zk.ZkClientFactory;
 
 import javax.inject.Singleton;
@@ -33,7 +34,7 @@ public class FrontendBinder extends AbstractBinder {
         bind(Preconditions.class).to(Preconditions.class);
         bind(MessageContentWrapper.class).to(MessageContentWrapper.class);
         bind(KafkaBrokerMessageProducer.class).to(BrokerMessageProducer.class).in(Singleton.class);
-        bind(MessageValidator.class).to(MessageValidator.class).in(Singleton.class);
+        bind(MessageValidators.class).to(MessageValidators.class).in(Singleton.class);
 
         bind(HealthCheckService.class).to(HealthCheckService.class).in(Singleton.class);
         bind(MongoLogRepository.class).to(LogRepository.class).in(Singleton.class);
@@ -41,6 +42,7 @@ public class FrontendBinder extends AbstractBinder {
         bindFactory(KafkaMessageProducerFactory.class).to(Producers.class).in(Singleton.class);
         bindFactory(ZkClientFactory.class).to(ZkClient.class).in(Singleton.class);
         bindSingleton(PublishingMessageTracker.class);
+        bindSingleton(TopicMessageValidatorFactory.class);
         bindSingleton(NoOperationPublishingTracker.class);
         bindSingleton(Trackers.class);
         bindFactory(ZookeeperTopicsCacheFactory.class).to(TopicsCache.class).in(Singleton.class);

@@ -48,7 +48,7 @@ public class TopicService {
 
     public void createTopic(Topic topic) {
         if (!isNullOrEmpty(topic.getMessageSchema())) {
-            schemaValidator.check(topic.getMessageSchema());
+            schemaValidator.check(topic.getMessageSchema(), topic.getContentType());
         }
         topicRepository.createTopic(topic);
 
@@ -81,7 +81,7 @@ public class TopicService {
 
         if (!retrieved.equals(modified)) {
             if (!isNullOrEmpty(modified.getMessageSchema())) {
-                schemaValidator.check(modified.getMessageSchema());
+                schemaValidator.check(modified.getMessageSchema(), topic.getContentType());
             }
 
             if (retrieved.getRetentionTime() != modified.getRetentionTime()) {
