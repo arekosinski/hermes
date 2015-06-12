@@ -5,6 +5,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.allegro.tech.hermes.api.Subscription;
+import pl.allegro.tech.hermes.api.Topic;
 import pl.allegro.tech.hermes.common.metric.HermesMetrics;
 import pl.allegro.tech.hermes.consumers.consumer.offset.SubscriptionOffsetCommitQueues;
 import pl.allegro.tech.hermes.common.metric.Timers;
@@ -33,7 +34,8 @@ public class Consumer implements Runnable {
 
     private volatile boolean consuming = true;
 
-    public Consumer(SplitMessagesReceiver messageReceiver, HermesMetrics hermesMetrics, Subscription subscription,
+    // TODO Use topic param to get info about content type
+    public Consumer(SplitMessagesReceiver messageReceiver, HermesMetrics hermesMetrics, Topic topic, Subscription subscription,
                     ConsumerRateLimiter rateLimiter, SubscriptionOffsetCommitQueues subscriptionOffsetCommitQueues, ConsumerMessageSender sender,
                     Semaphore inflightSemaphore, Trackers trackers) {
         this.messageReceiver = messageReceiver;

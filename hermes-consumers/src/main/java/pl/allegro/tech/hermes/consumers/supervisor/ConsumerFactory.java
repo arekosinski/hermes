@@ -1,6 +1,7 @@
 package pl.allegro.tech.hermes.consumers.supervisor;
 
 import pl.allegro.tech.hermes.api.Subscription;
+import pl.allegro.tech.hermes.api.Topic;
 import pl.allegro.tech.hermes.common.config.ConfigFactory;
 import pl.allegro.tech.hermes.common.metric.HermesMetrics;
 import pl.allegro.tech.hermes.common.time.Clock;
@@ -14,6 +15,7 @@ import pl.allegro.tech.hermes.consumers.consumer.receiver.MessageSplitter;
 import pl.allegro.tech.hermes.consumers.consumer.receiver.ReceiverFactory;
 import pl.allegro.tech.hermes.consumers.consumer.receiver.SplitMessagesReceiver;
 import pl.allegro.tech.hermes.consumers.message.tracker.Trackers;
+import pl.allegro.tech.hermes.domain.topic.TopicRepository;
 
 import javax.inject.Inject;
 import java.util.concurrent.Semaphore;
@@ -31,6 +33,7 @@ public class ConsumerFactory {
     private final Trackers trackers;
     private final ConsumerMessageSenderFactory consumerMessageSenderFactory;
     private final Clock clock;
+    private final TopicRepository topicRepository;
 
     @Inject
     public ConsumerFactory(ReceiverFactory messageReceiverFactory,
@@ -41,7 +44,8 @@ public class ConsumerFactory {
             OutputRateCalculator outputRateCalculator,
             Trackers trackers,
             ConsumerMessageSenderFactory consumerMessageSenderFactory,
-            Clock clock) {
+            Clock clock,
+            TopicRepository topicRepository) {
 
         this.messageReceiverFactory = messageReceiverFactory;
         this.hermesMetrics = hermesMetrics;
@@ -52,6 +56,7 @@ public class ConsumerFactory {
         this.trackers = trackers;
         this.consumerMessageSenderFactory = consumerMessageSenderFactory;
         this.clock = clock;
+        this.topicRepository = topicRepository;
     }
 
     Consumer createConsumer(Subscription subscription) {
@@ -63,9 +68,12 @@ public class ConsumerFactory {
 
         Semaphore inflightSemaphore = new Semaphore(configFactory.getIntProperty(CONSUMER_INFLIGHT_SIZE));
 
+        Topic topic = topicRepository.getTopicDetails(subscription.getTopicName());
+
         return new Consumer(
             new SplitMessagesReceiver(messageReceiverFactory.createMessageReceiver(subscription), messageSplitter),
             hermesMetrics,
+            topic,
             subscription,
             consumerRateLimiter,
             subscriptionOffsetCommitQueues,

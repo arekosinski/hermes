@@ -11,6 +11,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import pl.allegro.tech.hermes.api.EndpointAddress;
 import pl.allegro.tech.hermes.api.Subscription;
 import pl.allegro.tech.hermes.api.SubscriptionPolicy;
+import pl.allegro.tech.hermes.api.Topic;
 import pl.allegro.tech.hermes.api.TopicName;
 import pl.allegro.tech.hermes.common.config.ConfigFactory;
 import pl.allegro.tech.hermes.common.config.Configs;
@@ -54,6 +55,10 @@ public class ConsumerTest {
             .withSubscriptionPolicy(new SubscriptionPolicy(10, 10000, false))
             .build();
 
+    private static final Topic TOPIC = Topic.Builder.topic()
+            .withName("group", "topic")
+            .build();
+
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private ConfigFactory configFactory;
 
@@ -94,7 +99,7 @@ public class ConsumerTest {
     public void setUp() throws Exception {
         when(configFactory.getIntProperty(Configs.REPORT_PERIOD)).thenReturn(10);
         when(configFactory.getIntProperty(Configs.CONSUMER_INFLIGHT_SIZE)).thenReturn(50);
-        consumer = spy(new Consumer(messageReceiver, hermesMetrics, SUBSCRIPTION,
+        consumer = spy(new Consumer(messageReceiver, hermesMetrics, TOPIC, SUBSCRIPTION,
                 consumerRateLimiter, partitionOffsetHelper, sender, infligtSemaphore, trackers));
     }
 
